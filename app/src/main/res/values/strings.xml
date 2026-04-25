@@ -1,0 +1,40 @@
+<resources>
+    <string name="add_task">+ Add Task</string>
+
+    <!-- Global -->
+    <string name="go_back_label">Go Back</string>
+
+    <!-- APP / About -->
+    <string name="app_name" translatable="false">Tui</string>
+    <string name="app_description">A minimal, privacy-first focus session app designed to help you stay present and intentional with your time.</string>
+    <string name="icon_block_desc">No Background Tasks</string>
+    <string name="icon_ads_desc">No Ads</string>
+    <string name="icon_location_desc">No Trackers</string>
+    <string name="icon_offline_desc">Works Offline</string>
+    <string name="main_project_url" translatable="false">github.com/rama-io/tui</string>
+    <string name="app_header">App</string>
+    <string name="icons_header">Icons</string>
+    <string name="fonts_header">Fonts</string>
+
+    <string name="gpl3_desc" translatable="false">GPL 3.0 or Later</string>
+    <string name="ofl_1_1_desc" translatable="false">OFL 1.1</string>
+    <string name="apache_2_desc" translatable="false">Apache 2.0</string>
+    <string name="cc_4_desc" translatable="false">CC 4.0</string>
+
+    <string name="hackernoon_url" translatable="false">github.com/hackernoon/pixel-icon-library</string>
+    <string name="app_creator" translatable="false">Pombo</string>
+    <string name="hackernoon_creator" translatable="false">HackerNoon</string>
+    <string name="hackernoon_product" translatable="false">Pixel Icon Library</string>
+    <string name="jersey_creator" translatable="false">Sarah Cadigan-Fried</string>
+    <string name="jersey_url" translatable="false">github.com/scfried/soft-type-jersey</string>
+    <string name="font_jersey_label" translatable="false">Jersey 25</string>
+    <string name="font_quicksand_label" translatable="false">Quicksand</string>
+
+    <!-- Dialog -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Dialog :: Delete Group -->
+    <string name="delete_group_title">Are you sure you want to delete this group?\nThis action cannot be undone.</string>
+    <string name="delete_group">Delete group</string>
+</resources>

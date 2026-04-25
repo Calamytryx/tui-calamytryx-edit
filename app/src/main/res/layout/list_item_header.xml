@@ -1,0 +1,95 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/app_row_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center">
+
+    <FrameLayout
+        android:id="@+id/edit_session_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12sp"
+        android:paddingStart="22sp">
+
+        <ImageView
+            android:layout_width="18sp"
+            android:layout_height="18sp"
+            android:src="@drawable/icon_edit" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/ascend_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12sp">
+
+        <ImageView
+            android:layout_width="24sp"
+            android:layout_height="24sp"
+            android:src="@drawable/icon_chevron_up_solid"
+            android:contentDescription="Ascend" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/descend_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12sp">
+
+        <ImageView
+            android:layout_width="24sp"
+            android:layout_height="24sp"
+            android:src="@drawable/icon_chevron_down_solid"
+            android:contentDescription="Descend" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/group_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="[-] Workout :: 44:00"
+        android:textSize="18sp"
+        android:paddingTop="12sp"
+        android:paddingBottom="12sp"
+        android:textColor="@color/foreground" />
+
+    <FrameLayout
+        android:id="@+id/add_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12sp">
+
+        <ImageView
+            android:layout_width="18sp"
+            android:layout_height="18sp"
+            android:src="@drawable/icon_plus_solid" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/reset_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12sp">
+
+        <ImageView
+            android:layout_width="18sp"
+            android:layout_height="18sp"
+            android:src="@drawable/icon_refresh" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/start_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="12sp">
+
+        <ImageView
+            android:id="@+id/start_group_icon"
+            android:layout_width="18sp"
+            android:layout_height="18sp"
+            android:src="@drawable/icon_play" />
+    </FrameLayout>
+
+</LinearLayout>
