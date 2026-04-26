@@ -11,14 +11,21 @@ import com.rama.tui.managers.MusicManager
 
 class TrackAdapter(
     private val context: Context,
-    private var tracks: List<Track>,
+    private val allTracks: List<Track>,
 ) : BaseAdapter() {
 
-    private var filtered: List<Track> = tracks
+    private var tracks: List<Track> = allTracks
+    private var filtered: List<Track> = allTracks
 
     fun updateTracks(newTracks: List<Track>) {
         tracks = newTracks
         filtered = newTracks
+        notifyDataSetChanged()
+    }
+
+    fun resetToFullLibrary() {
+        tracks = allTracks
+        filtered = allTracks
         notifyDataSetChanged()
     }
 
@@ -53,7 +60,9 @@ class TrackAdapter(
         FontManager.applyToView(context, view)
 
         view.setOnClickListener {
-            MusicManager.play(tracks.indexOf(track))
+            val filteredList = filtered.toList()
+            MusicManager.setTracks(filteredList, filtered.indexOf(track))
+            updateTracks(filteredList) // base list is now the filtered list
         }
 
         return view

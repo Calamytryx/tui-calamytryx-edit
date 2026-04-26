@@ -96,7 +96,12 @@ class HomeFragment : Fragment() {
                 (listView.adapter as? TrackAdapter)?.filter(s?.toString() ?: "")
             }
         })
-        clearButton.setOnClickListener { filterInput.text.clear() }
+        
+        clearButton.setOnClickListener {
+            filterInput.text.clear()
+            (listView.adapter as? TrackAdapter)?.resetToFullLibrary()
+            MusicManager.setTracks(MusicManager.allTracks) // see below
+        }
 
         MusicManager.onStateChanged = { activity?.runOnUiThread { refreshUi() } }
 

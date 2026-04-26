@@ -29,6 +29,14 @@ object MusicManager {
 
     val currentTrack: Track? get() = tracks.getOrNull(currentIndex)
 
+    var allTracks: List<Track> = emptyList()
+        private set
+
+    fun setTracks(newTracks: List<Track>, index: Int = 0) {
+        tracks = newTracks
+        play(index)
+    }
+
     fun hasPermission(context: Context?): Boolean {
         if (context == null) return false
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
@@ -47,7 +55,8 @@ object MusicManager {
     fun loadTracks(context: Context): Boolean {
         if (!hasPermission(context)) return false
         val musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
-        tracks = scanDir(musicDir)
+        allTracks = scanDir(musicDir)
+        tracks = allTracks
         if (tracks.isNotEmpty() && currentIndex < 0) currentIndex = 0
         return true
     }
