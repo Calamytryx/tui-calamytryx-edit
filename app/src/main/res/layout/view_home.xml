@@ -16,6 +16,8 @@
         android:layout_weight="1" />
 
     <LinearLayout
+        android:background="@color/bg_secondary"
+        android:padding="8sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -23,55 +25,62 @@
         android:orientation="horizontal">
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
 
             <ImageView
+                android:layout_gravity="center"
                 android:layout_width="28sp"
                 android:layout_height="28sp"
                 android:src="@drawable/ic_repeat_24dp" />
         </FrameLayout>
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16sp">
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
 
             <ImageView
-                android:layout_width="48sp"
-                android:layout_height="48sp"
+                android:layout_gravity="center"
+                android:layout_width="46sp"
+                android:layout_height="46sp"
                 android:src="@drawable/ic_prev" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/play_pause_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10sp">
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
 
             <ImageView
-                android:layout_width="64sp"
-                android:layout_height="64sp"
+                android:layout_gravity="center"
+                android:layout_width="56sp"
+                android:layout_height="56sp"
                 android:src="@drawable/ic_play_circle" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/next_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16sp">
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
 
             <ImageView
-                android:layout_width="48sp"
-                android:layout_height="48sp"
+                android:layout_gravity="center"
+                android:layout_width="46sp"
+                android:layout_height="46sp"
                 android:src="@drawable/ic_next" />
         </FrameLayout>
 
         <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
 
             <ImageView
+                android:layout_gravity="center"
                 android:layout_width="28sp"
                 android:layout_height="28sp"
                 android:src="@drawable/ic_shuffle" />

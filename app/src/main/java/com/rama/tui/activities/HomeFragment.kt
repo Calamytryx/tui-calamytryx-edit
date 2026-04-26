@@ -1,35 +1,31 @@
 package com.rama.tui.activities
 
+import android.Manifest
 import android.app.Fragment
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ListView
-import android.widget.TextView
-import com.rama.tui.DatabaseHelper
 import com.rama.tui.R
-import com.rama.tui.SessionItem
-import com.rama.tui.managers.FontManager
-import com.rama.tui.managers.SoundManager
-import com.rama.tui.widgets.WdButton
+import com.rama.tui.TrackAdapter
+import com.rama.tui.managers.MusicManager
 
 class HomeFragment : Fragment() {
 
     private lateinit var listView: ListView
-    private val dbHelper by lazy { DatabaseHelper(activity) }
-    private lateinit var db: android.database.sqlite.SQLiteDatabase
-
-    private lateinit var taskNameView: TextView
-    private lateinit var timerView: TextView
-    private lateinit var nextTaskView: TextView
-    private lateinit var globalControllers: LinearLayout
-    private lateinit var editButton: WdButton
     private lateinit var playPauseIcon: ImageView
+    private lateinit var playPauseButton: FrameLayout
+    private lateinit var nextButton: FrameLayout
+    private lateinit var prevButton: FrameLayout
 
-    private val items: MutableList<SessionItem> = mutableListOf()
+    companion object {
+        private const val REQ_AUDIO = 1001
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,30 +37,67 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         listView = view.findViewById(R.id.task_list)
+        playPauseButton = view.findViewById(R.id.play_pause_button)
+        nextButton = view.findViewById(R.id.next_button)
 
-        SoundManager.init()
+        playPauseIcon = playPauseButton.getChildAt(0) as ImageView
 
-        db = dbHelper.writableDatabase
-        loadItems()
+        playPauseButton.setOnClickListener { MusicManager.togglePlayPause() }
+        nextButton.setOnClickListener { MusicManager.next() }
 
-        listView.post { FontManager.applyToListView(activity, listView) }
-    }
+        val bar = nextButton.parent as ViewGroup
+        prevButton = bar.getChildAt(bar.indexOfChild(nextButton) - 1) as FrameLayout
+        prevButton.setOnClickListener { MusicManager.prev() }
 
-    // Helpers
+        MusicManager.onStateChanged = { activity?.runOnUiThread { refreshUi() } }
 
-    private fun loadItems() {
-        items.clear()
-        val sessions = dbHelper.getSessions(db)
-        for ((id, name) in sessions) {
-            val tasks = dbHelper.getSessionTasks(db, id)
-            items.add(SessionItem.Header(id, name, tasks))
-            for (task in tasks) items.add(SessionItem.Row(id, task))
-        }
+        loadOrRequestTracks()
     }
 
     override fun onDestroyView() {
-        SoundManager.release()
-        dbHelper.close()
+        MusicManager.onStateChanged = null
         super.onDestroyView()
+    }
+
+    private fun loadOrRequestTracks() {
+        if (MusicManager.hasPermission(activity)) {
+            loadTracks()
+        } else {
+            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                Manifest.permission.READ_MEDIA_AUDIO
+            else
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            requestPermissions(arrayOf(permission), REQ_AUDIO)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == REQ_AUDIO &&
+            grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+        ) {
+            loadTracks()
+        }
+    }
+
+    private fun loadTracks() {
+        MusicManager.loadTracks(activity)
+        listView.adapter = TrackAdapter(activity, MusicManager.tracks)
+        refreshUi()
+    }
+
+    private fun refreshUi() {
+        playPauseIcon.setImageResource(
+            if (MusicManager.isPlaying) R.drawable.ic_pause_circle
+            else R.drawable.ic_play_circle
+        )
+
+        (listView.adapter as? TrackAdapter)?.notifyDataSetChanged()
+
+        val idx = MusicManager.currentIndex
+        if (idx >= 0) listView.smoothScrollToPosition(idx)
     }
 }
