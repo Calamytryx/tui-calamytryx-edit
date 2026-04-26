@@ -14,34 +14,40 @@ class TrackAdapter(
     private val tracks: List<Track>,
 ) : BaseAdapter() {
 
-    override fun getCount(): Int = tracks.size
-    override fun getItem(position: Int): Track = tracks[position]
+    private var filtered: List<Track> = tracks
+
+    fun filter(query: String) {
+        filtered = if (query.isBlank()) tracks
+        else tracks.filter { it.file.nameWithoutExtension.contains(query, ignoreCase = true) }
+        notifyDataSetChanged()
+    }
+
+    override fun getCount(): Int = filtered.size
+    override fun getItem(position: Int): Track = filtered[position]
     override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView
             ?: LayoutInflater.from(context).inflate(R.layout.list_track, parent, false)
 
-        val track = tracks[position]
+        val track = filtered[position]
 
         view.findViewById<TextView>(R.id.track_title).text = track.title
         view.findViewById<TextView>(R.id.track_artist).text =
             track.displayArtists.ifEmpty { "---" }
-
         view.findViewById<TextView>(R.id.track_country).text =
             track.displayCountries.ifEmpty { "---" }
-
         view.findViewById<TextView>(R.id.track_lang).text =
             track.displayLanguages.ifEmpty { "---" }
 
-        // Highlight currently playing row
-        val isActive = position == MusicManager.currentIndex
+        // Highlight currently playing row by original index
+        val isActive = tracks.indexOf(track) == MusicManager.currentIndex
         view.alpha = if (isActive) 1f else 0.6f
 
         FontManager.applyToView(context, view)
 
         view.setOnClickListener {
-            MusicManager.play(position)
+            MusicManager.play(tracks.indexOf(track))
         }
 
         return view

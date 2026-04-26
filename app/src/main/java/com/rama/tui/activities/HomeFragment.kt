@@ -8,12 +8,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ListView
 import com.rama.tui.R
 import com.rama.tui.TrackAdapter
 import com.rama.tui.managers.MusicManager
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.TextView
 
 class HomeFragment : Fragment() {
 
@@ -22,6 +26,8 @@ class HomeFragment : Fragment() {
     private lateinit var playPauseButton: FrameLayout
     private lateinit var nextButton: FrameLayout
     private lateinit var prevButton: FrameLayout
+    private lateinit var progressBg: View
+    private lateinit var currentlyPlayingText: TextView
 
     companion object {
         private const val REQ_AUDIO = 1001
@@ -50,6 +56,27 @@ class HomeFragment : Fragment() {
         prevButton.setOnClickListener { MusicManager.prev() }
 
         MusicManager.onStateChanged = { activity?.runOnUiThread { refreshUi() } }
+
+        val filterInput = view.findViewById<EditText>(R.id.filter_input)
+        val clearButton = view.findViewById<FrameLayout>(R.id.clear_button)
+
+        filterInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) =
+                Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                (listView.adapter as? TrackAdapter)?.filter(s?.toString() ?: "")
+            }
+        })
+
+        clearButton.setOnClickListener {
+            filterInput.text.clear()
+        }
+
+        val nowPlaying = view.findViewById<FrameLayout>(R.id.currently_playing_display)
+        progressBg = nowPlaying.findViewById(R.id.progress_bg)
+        currentlyPlayingText = nowPlaying.getChildAt(1) as TextView
 
         loadOrRequestTracks()
     }
@@ -97,6 +124,18 @@ class HomeFragment : Fragment() {
             if (MusicManager.isPlaying) R.drawable.icon_pause_circle
             else R.drawable.icon_play_circle
         )
+
+        val track = MusicManager.currentTrack
+        currentlyPlayingText.text = track?.let { "${it.displayArtists} — ${it.title}" } ?: "—"
+
+        progressBg.post {
+            val parent = progressBg.parent as View
+            val progress = if (MusicManager.tracks.isNotEmpty())
+                (MusicManager.currentIndex + 1).toFloat() / MusicManager.tracks.size
+            else 0f
+            progressBg.layoutParams.width = (parent.width * progress).toInt()
+            progressBg.requestLayout()
+        }
 
         (listView.adapter as? TrackAdapter)?.notifyDataSetChanged()
 
