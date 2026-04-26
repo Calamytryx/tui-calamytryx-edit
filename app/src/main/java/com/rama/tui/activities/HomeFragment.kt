@@ -79,8 +79,9 @@ class HomeFragment : Fragment() {
             refreshUi()
         }
         shuffleButton.setOnClickListener {
-            MusicManager.isShuffle = !MusicManager.isShuffle
-            refreshUi()
+            MusicManager.shuffleTracks()
+            (listView.adapter as? TrackAdapter)?.updateTracks(MusicManager.tracks)
+            listView.smoothScrollToPosition(0)
         }
 
         val filterInput = view.findViewById<EditText>(R.id.filter_input)
@@ -144,7 +145,6 @@ class HomeFragment : Fragment() {
             else R.drawable.icon_play_circle
         )
         repeatIcon.alpha = if (MusicManager.isRepeat) 1f else 0.3f
-        shuffleIcon.alpha = if (MusicManager.isShuffle) 1f else 0.3f
 
         val track = MusicManager.currentTrack
         currentlyPlayingText.text = track?.let { "${it.displayArtists} — ${it.title}" } ?: "—"

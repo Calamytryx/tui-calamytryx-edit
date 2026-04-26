@@ -23,7 +23,6 @@ object MusicManager {
     var isPlaying: Boolean = false
         private set
 
-    var isShuffle: Boolean = false
     var isRepeat: Boolean = false
 
     var onStateChanged: (() -> Unit)? = null
@@ -94,7 +93,6 @@ object MusicManager {
     fun next() {
         if (tracks.isEmpty()) return
         currentIndex = when {
-            isShuffle -> tracks.indices.filter { it != currentIndex }.randomOrNull() ?: 0
             currentIndex < tracks.lastIndex -> currentIndex + 1
             isRepeat -> 0
             else -> return
@@ -121,9 +119,20 @@ object MusicManager {
         return p.currentPosition.toFloat() / p.duration
     }
 
+    fun shuffleTracks() {
+        if (tracks.isEmpty()) return
+        val current = currentTrack
+        val rest = tracks.toMutableList().also {
+            if (current != null) it.remove(current)
+        }.shuffled()
+        tracks = if (current != null) listOf(current) + rest else rest
+        currentIndex = 0
+        onStateChanged?.invoke()
+    }
+
     private fun onTrackFinished() {
         when {
-            isRepeat && !isShuffle -> play(currentIndex)
+            isRepeat -> play(currentIndex)
             else -> next()
         }
     }

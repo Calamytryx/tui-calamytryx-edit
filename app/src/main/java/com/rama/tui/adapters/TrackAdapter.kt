@@ -11,10 +11,16 @@ import com.rama.tui.managers.MusicManager
 
 class TrackAdapter(
     private val context: Context,
-    private val tracks: List<Track>,
+    private var tracks: List<Track>,
 ) : BaseAdapter() {
 
     private var filtered: List<Track> = tracks
+
+    fun updateTracks(newTracks: List<Track>) {
+        tracks = newTracks
+        filtered = newTracks
+        notifyDataSetChanged()
+    }
 
     fun filter(query: String) {
         filtered = if (query.isBlank()) tracks
