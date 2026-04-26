@@ -43,7 +43,7 @@ class MainActivity : CsActivity() {
         super.onSaveInstanceState(outState)
         outState.putString(KEY_PAGE, currentPage.name)
     }
-    
+
     fun navigateTo(page: WdNavbar.Page) {
         if (page == currentPage && fragmentManager.findFragmentById(R.id.content_container) != null) return
 
@@ -52,8 +52,6 @@ class MainActivity : CsActivity() {
 
         val fragment: Fragment = when (page) {
             WdNavbar.Page.HOME -> HomeFragment()
-            WdNavbar.Page.STOPWATCH -> StopwatchFragment()
-            WdNavbar.Page.TIMER -> TimerFragment()
             WdNavbar.Page.ABOUT -> AboutFragment()
         }
 

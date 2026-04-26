@@ -91,8 +91,8 @@ class HomeFragment : Fragment() {
 
     private fun refreshUi() {
         playPauseIcon.setImageResource(
-            if (MusicManager.isPlaying) R.drawable.ic_pause_circle
-            else R.drawable.ic_play_circle
+            if (MusicManager.isPlaying) R.drawable.icon_pause_circle
+            else R.drawable.icon_play_circle
         )
 
         (listView.adapter as? TrackAdapter)?.notifyDataSetChanged()

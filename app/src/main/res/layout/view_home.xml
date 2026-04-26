@@ -6,6 +6,50 @@
     android:layout_height="match_parent"
     android:background="@color/bg_primary">
 
+    <LinearLayout
+        android:background="#17171D"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8sp"
+        android:paddingStart="16sp"
+        android:paddingEnd="16sp"
+        android:orientation="horizontal"
+        android:layout_gravity="center">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_gravity="center"
+                android:layout_width="24sp"
+                android:layout_height="24sp"
+                android:src="@drawable/icon_search" />
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/filter_input"
+            android:padding="16sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/foreground"
+            android:background="@android:color/transparent" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_gravity="center"
+                android:layout_width="24sp"
+                android:layout_height="24sp"
+                android:src="@drawable/icon_close" />
+        </FrameLayout>
+
+    </LinearLayout>
+
     <ListView
         android:id="@+id/task_list"
         android:layout_width="match_parent"
@@ -15,8 +59,25 @@
         android:layout_marginBottom="8sp"
         android:layout_weight="1" />
 
+    <FrameLayout
+        android:id="@+id/currently_playing_display"
+        android:background="@color/bg_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16sp"
+        android:layout_marginBottom="8sp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#868CB3"
+            android:text="Currently Playing"
+            android:textSize="16sp" />
+    </FrameLayout>
+
     <LinearLayout
         android:background="@color/bg_secondary"
+        android:baselineAligned="false"
         android:padding="8sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,7 +106,7 @@
                 android:layout_gravity="center"
                 android:layout_width="46sp"
                 android:layout_height="46sp"
-                android:src="@drawable/ic_prev" />
+                android:src="@drawable/icon_prev" />
         </FrameLayout>
 
         <FrameLayout
@@ -58,7 +119,7 @@
                 android:layout_gravity="center"
                 android:layout_width="56sp"
                 android:layout_height="56sp"
-                android:src="@drawable/ic_play_circle" />
+                android:src="@drawable/icon_play_circle" />
         </FrameLayout>
 
         <FrameLayout
@@ -71,7 +132,7 @@
                 android:layout_gravity="center"
                 android:layout_width="46sp"
                 android:layout_height="46sp"
-                android:src="@drawable/ic_next" />
+                android:src="@drawable/icon_next" />
         </FrameLayout>
 
         <FrameLayout
@@ -83,7 +144,7 @@
                 android:layout_gravity="center"
                 android:layout_width="28sp"
                 android:layout_height="28sp"
-                android:src="@drawable/ic_shuffle" />
+                android:src="@drawable/icon_shuffle" />
         </FrameLayout>
     </LinearLayout>
 
