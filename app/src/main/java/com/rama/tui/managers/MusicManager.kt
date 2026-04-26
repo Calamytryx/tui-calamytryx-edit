@@ -1,25 +1,27 @@
 package com.rama.tui.managers
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.media.MediaPlayer
-import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.os.Build
 import android.os.Environment
-import android.view.KeyEvent
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.content.ContextCompat
 import com.rama.tui.MediaButtonReceiver
+import com.rama.tui.MediaPlaybackService
 import com.rama.tui.Track
 import java.io.File
 
 object MusicManager {
 
     private var player: MediaPlayer? = null
-    private var mediaSession: MediaSession? = null
+    private var mediaSession: MediaSessionCompat? = null
     private var audioFocusRequest: android.media.AudioFocusRequest? = null
+    private var appContext: Context? = null
 
     var tracks: List<Track> = emptyList()
         private set
@@ -38,93 +40,49 @@ object MusicManager {
     var onStateChanged: (() -> Unit)? = null
     var onNotificationChanged: (() -> Unit)? = null
 
-    private var appContext: Context? = null
-
     val currentTrack: Track? get() = tracks.getOrNull(currentIndex)
 
     // region Media Session
 
-    fun requestAudioFocus(context: Context) {
-        val am = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest = android.media.AudioFocusRequest.Builder(
-                android.media.AudioManager.AUDIOFOCUS_GAIN
-            ).setOnAudioFocusChangeListener { focus ->
-                when (focus) {
-                    android.media.AudioManager.AUDIOFOCUS_LOSS -> if (isPlaying) togglePlayPause()
-                    android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isPlaying) togglePlayPause()
-                    android.media.AudioManager.AUDIOFOCUS_GAIN -> if (!isPlaying) togglePlayPause()
-                }
-            }.build().also { am.requestAudioFocus(it) }
-        } else {
-            @Suppress("DEPRECATION")
-            am.requestAudioFocus(
-                { focus ->
-                    when (focus) {
-                        android.media.AudioManager.AUDIOFOCUS_LOSS -> if (isPlaying) togglePlayPause()
-                        android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isPlaying) togglePlayPause()
-                        android.media.AudioManager.AUDIOFOCUS_GAIN -> if (!isPlaying) togglePlayPause()
-                    }
-                },
-                android.media.AudioManager.STREAM_MUSIC,
-                android.media.AudioManager.AUDIOFOCUS_GAIN
-            )
-        }
-    }
-
     fun initMediaSession(context: Context) {
         appContext = context.applicationContext
-        com.rama.tui.MediaPlaybackService.start(context)
 
-        mediaSession = MediaSession(context, "TuiMediaSession").apply {
-            setMediaButtonReceiver(
-                android.app.PendingIntent.getBroadcast(
-                    context, 0,
-                    Intent(Intent.ACTION_MEDIA_BUTTON).apply {
-                        setClass(
-                            context,
-                            MediaButtonReceiver::class.java
-                        )
-                    },
-                    android.app.PendingIntent.FLAG_IMMUTABLE
-                )
-            )
+        val receiver = ComponentName(context, MediaButtonReceiver::class.java)
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        else
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT
 
-            setCallback(object : MediaSession.Callback() {
-                override fun onPlay() {
-                    if (!isPlaying) togglePlayPause()
-                }
+        val mediaButtonIntent = android.app.PendingIntent.getBroadcast(
+            context, 0,
+            android.content.Intent(context, MediaButtonReceiver::class.java),
+            flags
+        )
 
-                override fun onPause() {
-                    if (isPlaying) togglePlayPause()
-                }
-
-                override fun onSkipToNext() {
-                    next()
-                }
-
-                override fun onSkipToPrevious() {
-                    prev()
-                }
-
-                override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
-                    val event =
-                        mediaButtonIntent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
-                    if (event?.action == KeyEvent.ACTION_DOWN) {
-                        when (event.keyCode) {
-                            KeyEvent.KEYCODE_MEDIA_PLAY -> onPlay()
-                            KeyEvent.KEYCODE_MEDIA_PAUSE -> onPause()
-                            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> togglePlayPause()
-                            KeyEvent.KEYCODE_MEDIA_NEXT -> next()
-                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> prev()
-                        }
+        mediaSession =
+            MediaSessionCompat(context, "TuiMediaSession", receiver, mediaButtonIntent).apply {
+                setMediaButtonReceiver(mediaButtonIntent)
+                setCallback(object : MediaSessionCompat.Callback() {
+                    override fun onPlay() {
+                        if (!isPlaying) togglePlayPause()
                     }
-                    return true
-                }
-            })
-            isActive = true
-        }
+
+                    override fun onPause() {
+                        if (isPlaying) togglePlayPause()
+                    }
+
+                    override fun onSkipToNext() {
+                        next()
+                    }
+
+                    override fun onSkipToPrevious() {
+                        prev()
+                    }
+                })
+                isActive = true
+            }
+
+        MediaPlaybackService.start(context)
     }
 
     fun releaseMediaSession() {
@@ -133,20 +91,60 @@ object MusicManager {
     }
 
     private fun updatePlaybackState() {
-        val state = if (isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED
+        val state =
+            if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
         mediaSession?.setPlaybackState(
-            PlaybackState.Builder()
+            PlaybackStateCompat.Builder()
                 .setState(state, player?.currentPosition?.toLong() ?: 0L, 1f)
                 .setActions(
-                    PlaybackState.ACTION_PLAY or
-                            PlaybackState.ACTION_PAUSE or
-                            PlaybackState.ACTION_PLAY_PAUSE or
-                            PlaybackState.ACTION_SKIP_TO_NEXT or
-                            PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                    PlaybackStateCompat.ACTION_PLAY or
+                            PlaybackStateCompat.ACTION_PAUSE or
+                            PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                            PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                 )
                 .build()
         )
     }
+
+    // endregion
+
+    // region Audio Focus
+
+    fun requestAudioFocus(context: Context) {
+        val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        // Required on older Android for Bluetooth headset button routing
+        @Suppress("DEPRECATION")
+        am.registerMediaButtonEventReceiver(ComponentName(context, MediaButtonReceiver::class.java))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest =
+                android.media.AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setOnAudioFocusChangeListener { focus ->
+                        when (focus) {
+                            AudioManager.AUDIOFOCUS_LOSS -> if (isPlaying) togglePlayPause()
+                            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isPlaying) togglePlayPause()
+                            AudioManager.AUDIOFOCUS_GAIN -> if (!isPlaying) togglePlayPause()
+                        }
+                    }.build().also { am.requestAudioFocus(it) }
+        } else {
+            @Suppress("DEPRECATION")
+            am.requestAudioFocus(
+                { focus ->
+                    when (focus) {
+                        AudioManager.AUDIOFOCUS_LOSS -> if (isPlaying) togglePlayPause()
+                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isPlaying) togglePlayPause()
+                        AudioManager.AUDIOFOCUS_GAIN -> if (!isPlaying) togglePlayPause()
+                    }
+                },
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+        }
+    }
+
+    // endregion
 
     // region Permissions
 
@@ -164,6 +162,8 @@ object MusicManager {
             permission
         ) == PackageManager.PERMISSION_GRANTED
     }
+
+    // endregion
 
     // region Track Loading
 
@@ -200,6 +200,8 @@ object MusicManager {
             ?.map { Track.fromFile(it) }
             ?.sortedBy { it.title.lowercase() }
             ?: emptyList()
+
+    // endregion
 
     // region Playback Control
 
@@ -264,8 +266,11 @@ object MusicManager {
         player = null
         isPlaying = false
         onStateChanged?.invoke()
+        onNotificationChanged?.invoke()
         updatePlaybackState()
     }
+
+    // endregion
 
     // region Track Management
 
@@ -291,6 +296,8 @@ object MusicManager {
         return p.currentPosition.toFloat() / p.duration
     }
 
+    // endregion
+
     // region Internal
 
     private fun onTrackFinished() {
@@ -299,4 +306,6 @@ object MusicManager {
             else -> next()
         }
     }
+
+    // endregion
 }

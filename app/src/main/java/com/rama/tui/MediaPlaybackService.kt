@@ -5,8 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import com.rama.tui.activities.MainActivity
@@ -39,29 +41,49 @@ class MediaPlaybackService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    private val controlReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                ACTION_PLAY_PAUSE -> MusicManager.togglePlayPause()
+                ACTION_NEXT -> MusicManager.next()
+                ACTION_PREV -> MusicManager.prev()
+                ACTION_STOP -> {
+                    MusicManager.release()
+                    stopSelf()
+                    return
+                }
+            }
+            updateNotification()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         MusicManager.onNotificationChanged = { updateNotification() }
+
+        val filter = IntentFilter().apply {
+            addAction(ACTION_PLAY_PAUSE)
+            addAction(ACTION_NEXT)
+            addAction(ACTION_PREV)
+            addAction(ACTION_STOP)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(controlReceiver, filter, RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(controlReceiver, filter)
+        }
+
         startForeground(NOTIFICATION_ID, buildNotification())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_PLAY_PAUSE -> MusicManager.togglePlayPause()
-            ACTION_NEXT -> MusicManager.next()
-            ACTION_PREV -> MusicManager.prev()
-            ACTION_STOP -> {
-                MusicManager.release()
-                stopSelf()
-                return START_NOT_STICKY
-            }
-        }
-        updateNotification()
         return START_STICKY
     }
 
     override fun onDestroy() {
+        unregisterReceiver(controlReceiver)
         MusicManager.onNotificationChanged = null
         super.onDestroy()
     }
@@ -84,21 +106,22 @@ class MediaPlaybackService : Service() {
         val track = MusicManager.currentTrack
         val isPlaying = MusicManager.isPlaying
 
+        val pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT or
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+
         // Tap notification open app
         val openAppIntent = PendingIntent.getActivity(
             this, 0,
             Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             },
-            PendingIntent.FLAG_UPDATE_CURRENT or
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+            pendingFlags
         )
 
-        fun actionIntent(action: String, requestCode: Int) = PendingIntent.getService(
+        fun actionIntent(action: String, requestCode: Int) = PendingIntent.getBroadcast(
             this, requestCode,
-            Intent(this, MediaPlaybackService::class.java).apply { this.action = action },
-            PendingIntent.FLAG_UPDATE_CURRENT or
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+            Intent(action).apply { setPackage(packageName) },
+            pendingFlags
         )
 
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
