@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.FrameLayout
 import android.widget.TextView
+import com.rama.tui.Track.Companion.normalize
 import com.rama.tui.managers.FontManager
 import com.rama.tui.managers.MusicManager
+import java.text.Normalizer
 
 class TrackAdapter(
     private val context: Context,
@@ -32,8 +34,16 @@ class TrackAdapter(
     }
 
     fun filter(query: String) {
-        filtered = if (query.isBlank()) tracks
-        else tracks.filter { it.file.nameWithoutExtension.contains(query, ignoreCase = true) }
+        val normalizedQuery = normalize(query)
+
+        filtered = if (normalizedQuery.isBlank()) {
+            tracks
+        } else {
+            tracks.filter {
+                it.normalizedName.contains(normalizedQuery)
+            }
+        }
+
         notifyDataSetChanged()
     }
 
