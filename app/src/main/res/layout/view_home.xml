@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_primary">
+    android:background="@color/bg_1">
 
     <LinearLayout
         android:background="@color/input"
@@ -62,7 +62,7 @@
 
     <FrameLayout
         android:id="@+id/currently_playing_display"
-        android:background="#000010"
+        android:background="@color/bg_display"
         android:layout_width="match_parent"
         android:layout_height="30sp"
         android:layout_marginBottom="8sp">
@@ -86,7 +86,7 @@
     </FrameLayout>
 
     <LinearLayout
-        android:background="@color/bg_secondary"
+        android:background="@color/bg_2"
         android:baselineAligned="false"
         android:padding="8sp"
         android:layout_width="match_parent"

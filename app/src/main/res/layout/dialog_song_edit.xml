@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16sp"
+    android:orientation="vertical"
+    android:background="@color/bg_1"
+    android:focusableInTouchMode="true">
+
+    <TextView
+        android:id="@+id/modal_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16sp"
+        android:textSize="32sp"
+        android:textColor="@color/foreground"
+        android:text="Edit song"
+        android:gravity="center" />
+
+    <ScrollView
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:padding="16sp"
+            android:orientation="vertical"
+            android:background="@color/bg_1"
+            android:focusableInTouchMode="true">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:textSize="16sp"
+                android:textColor="@color/foreground"
+                android:text="Title" />
+
+            <EditText
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:padding="16sp"
+                android:layout_marginBottom="8sp"
+                android:background="@color/input" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:textSize="16sp"
+                android:textColor="@color/foreground"
+                android:text="Artists (Comma Separated)" />
+
+            <EditText
+                android:id="@+id/artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:padding="16sp"
+                android:layout_marginBottom="8sp"
+                android:background="@color/input" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:textSize="16sp"
+                android:textColor="@color/foreground"
+                android:text="Countries (Comma Separated)" />
+
+            <EditText
+                android:id="@+id/country"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:padding="16sp"
+                android:layout_marginBottom="8sp"
+                android:background="@color/input" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:textSize="16sp"
+                android:textColor="@color/foreground"
+                android:text="Languages (Comma Separated)" />
+
+            <EditText
+                android:id="@+id/language"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:padding="16sp"
+                android:layout_marginBottom="8sp"
+                android:background="@color/input" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:textSize="16sp"
+                android:textColor="@color/foreground"
+                android:text="Summary" />
+
+            <TextView
+                android:id="@+id/display"
+                android:background="@color/bg_display"
+                android:padding="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:lineHeight="20sp"
+                android:textSize="16sp"
+                android:textColor="@color/accent_tertiary"
+                android:text="Artist_1, Artist_2, .., Artist_N - Title - Country_1, Country_2, .., Country_N - Language_1, Language_2, .., Language_N" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:textSize="16sp"
+                android:textColor="@color/foreground"
+                android:text="Metadata" />
+
+            <TextView
+                android:id="@+id/display_metadata"
+                android:background="@color/bg_display"
+                android:padding="16sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8sp"
+                android:lineHeight="20sp"
+                android:textSize="16sp"
+                android:textColor="@color/danger"
+                android:text="Artist, Title, Album, Year, Covert, Description" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.rama.tui.widgets.WdButton
+        android:id="@+id/delete_metadata_button"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="8sp"
+        android:layout_height="wrap_content"
+        android:background="@color/danger"
+        android:text="Delete metadata" />
+
+    <com.rama.tui.widgets.WdButton
+        android:id="@+id/delete_button"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="8sp"
+        android:layout_height="wrap_content"
+        android:background="@color/danger"
+        android:text="Delete song" />
+
+    <com.rama.tui.widgets.WdButton
+        android:id="@+id/update_button"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="8sp"
+        android:layout_height="wrap_content"
+        android:background="@color/button_secondary_color"
+        android:text="Update song" />
+
+    <com.rama.tui.widgets.WdButton
+        android:id="@+id/cancel_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/button_primary_color"
+        android:text="@string/cancel" />
+</LinearLayout>
