@@ -132,7 +132,8 @@ class MediaPlaybackService : Service() {
         }
 
         builder
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+        builder.setColor(resources.getColor(R.color.media_background))
             .setContentTitle(track?.title ?: "Not playing")
             .setContentText(track?.displayArtists?.ifEmpty { null } ?: "")
             .setContentIntent(openAppIntent)
