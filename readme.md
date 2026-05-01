@@ -9,11 +9,27 @@ access, and no external APIs.
 
 ---
 
+## Branding creation
+
+Want to see how Tui’s visual identity came together?
+
+This short session captures part of the process behind designing the app’s header. Exploring sketches, composition, and refinement as the direction takes shape.
+
+https://www.youtube.com/watch?v=DPWnYDvfU2M
+
+---
+
 ## Screenshots
 
 | Focus                                                                    | Stopwatch                                                                    | About                                                                     |
 |--------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------------------------------------|
 | ![Home](./fastlane/metadata/android/en-US/images/phoneScreenshots/1.png) | ![Settings](./fastlane/metadata/android/en-US/images/phoneScreenshots/2.png) | ![About](./fastlane/metadata/android/en-US/images/phoneScreenshots/3.png) |
+
+---
+
+## Usage
+
+- Long-press in an track to open **Their Settings**.
 
 ---
 
