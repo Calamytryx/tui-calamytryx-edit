@@ -8,6 +8,20 @@
     android:focusableInTouchMode="true"
     android:background="@color/bg_1">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8sp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/cassette"
+            android:adjustViewBounds="true"
+            android:scaleType="fitEnd" />
+
+    </FrameLayout>
+
     <LinearLayout
         android:background="@color/input"
         android:layout_width="match_parent"
@@ -54,6 +68,7 @@
     </LinearLayout>
 
     <ListView
+
         android:id="@+id/task_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
