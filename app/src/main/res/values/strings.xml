@@ -4,6 +4,7 @@
     <string name="activity_about_label">About</string>
 
     <!-- H2 -->
+    <string name="h2_title_edit_track">Edit track</string>
     <string name="h2_color_picker">Pick a Color</string>
 
     <!-- H3 -->
@@ -38,8 +39,10 @@
     <string name="colorpicker_theme_button_2_background">Button 2 Background</string>
     <string name="colorpicker_theme_danger">Danger</string>
     <string name="colorpicker_theme_disabled">Disabled</string>
-    <string name="colorpicker_theme_task_frequency">Task Frequency</string>
     <string name="colorpicker_theme_progressbar">Progress Bar</string>
+    <string name="colorpicker_theme_background_4">Background 4</string>
+    <string name="colorpicker_theme_bg_display">Display Background</string>
+    <string name="colorpicker_theme_media_background">Media Background</string>
     <!-- FilePicker -->
     <string name="filepicker_font_custom_none">No font selected</string>
 
@@ -57,10 +60,24 @@
     <string name="checkbox_lock_screen_from_falling_asleep">Keep screen awake</string>
 
     <!-- InputLabel -->
+    <string name="label_track_title">Title</string>
+    <string name="label_track_artists">Artists (Comma Separated)</string>
+    <string name="label_track_countries">Countries :: ISO 3166-1 Alpha-2 (Comma Separated)</string>
+    <string name="label_track_languages">Languages :: ISO 639 (Comma Separated)</string>
+    <string name="label_track_summary">Summary</string>
+    <string name="label_track_metadata">Metadata</string>
 
     <!-- InputHints -->
     <string name="hint_filter_tracks">Search…</string>
     <string name="placeholder_now_playing">--</string>
+    <string name="placeholder_track_field">--</string>
+    <string name="placeholder_summary_format">Artist_1, Artist_2, .., Artist_N - Title - Country_1, Country_2, .., Country_N - Language_1, Language_2, .., Language_N</string>
+    <string name="placeholder_metadata_format">Artist, Title, Album, Year, Cover, Description</string>
+
+    <!-- Button -->
+    <string name="btn_delete_metadata">Delete metadata</string>
+    <string name="btn_delete_track">Delete track</string>
+    <string name="btn_update_track">Update track</string>
 
     <!-- Toasts -->
     <string name="toast_invalid_color">Invalid color</string>

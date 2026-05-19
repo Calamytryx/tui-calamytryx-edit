@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.TextView
 import com.rama.tui.R
@@ -29,7 +30,6 @@ object ThemeManager {
         val button_2: Int,
         val danger: Int,
         val collapsible_header: Int,
-        val task_frequency: Int,
         val progressbar: Int,
     )
 
@@ -53,8 +53,7 @@ object ThemeManager {
         button_2 = 0xFF6194AF.toInt(),
         danger = 0xFFDC6364.toInt(),
         collapsible_header = 0xFF878787.toInt(),
-        task_frequency = 0xFF71ACC7.toInt(),
-        progressbar = 0xFF253F71.toInt(),
+        progressbar = 0xFF4c8555.toInt(),
     )
 
     // Rama
@@ -72,13 +71,12 @@ object ThemeManager {
         accent_3 = 0xFFDCD07C.toInt(),
         disabled = 0xFF888888.toInt(),
         input = 0xFF161f16.toInt(),
-        button_1 = 0xFF45995a.toInt(),
-        button_1_selected = 0xFF62BF79.toInt(),
+        button_1 = 0xFFABD68E.toInt(),
+        button_1_selected = 0xFFC4E7AD.toInt(),
         button_2 = 0xFFb8e39d.toInt(),
         danger = 0xFFDC6364.toInt(),
         collapsible_header = 0xff8cde285.toInt(),
-        task_frequency = 0xFF7CCF8E.toInt(),
-        progressbar = 0xFF355B36.toInt(),
+        progressbar = 0xFF4F6B45.toInt(),
     )
 
     // Catppuccin Mocha
@@ -96,13 +94,12 @@ object ThemeManager {
         accent_3 = 0xFFFFD700.toInt(),
         disabled = 0xFF6C7086.toInt(),
         input = 0xFF181825.toInt(),
-        button_1 = 0xFF89B4FA.toInt(),
-        button_1_selected = 0xFFA6C8FF.toInt(),
-        button_2 = 0xFF74C7EC.toInt(),
+        button_1 = 0xFFCBA6F7.toInt(),
+        button_1_selected = 0xFFDDBBFF.toInt(),
+        button_2 = 0xFF89B4FA.toInt(),
         danger = 0xFFF38BA8.toInt(),
         collapsible_header = 0xFFB4BEFE.toInt(),
-        task_frequency = 0xFF89DCEB.toInt(),
-        progressbar = 0xFF394B70.toInt(),
+        progressbar = 0xFF5E4A73.toInt(),
     )
 
 
@@ -126,8 +123,7 @@ object ThemeManager {
         button_2 = 0xFF8BE9FD.toInt(),
         danger = 0xFFFF79C6.toInt(),
         collapsible_header = 0xFFBD93F9.toInt(),
-        task_frequency = 0xFF8BE9FD.toInt(),
-        progressbar = 0xFF44475A.toInt(),
+        progressbar = 0xFF5A4A75.toInt(),
     )
 
     // Melange Dark
@@ -145,13 +141,12 @@ object ThemeManager {
         accent_3 = 0xFFE49B5D.toInt(),
         disabled = 0xFF867462.toInt(),
         input = 0xFF211E1B.toInt(),
-        button_1 = 0xFF7F91B2.toInt(),
-        button_1_selected = 0xFFA0B2D4.toInt(),
-        button_2 = 0xFF85B695.toInt(),
+        button_1 = 0xFFEBC06D.toInt(),
+        button_1_selected = 0xFFF4D18D.toInt(),
+        button_2 = 0xFF78997A.toInt(),
         danger = 0xFFB65C60.toInt(),
         collapsible_header = 0xFFEBC06D.toInt(),
-        task_frequency = 0xFF8CBBA3.toInt(),
-        progressbar = 0xFF4A443D.toInt(),
+        progressbar = 0xFF5C4A2B.toInt(),
     )
 
     // Tokyo Night
@@ -170,12 +165,11 @@ object ThemeManager {
         disabled = 0xFF565F89.toInt(),
         input = 0xFF16161E.toInt(),
         button_1 = 0xFF7AA2F7.toInt(),
-        button_1_selected = 0xFF9BB8FF.toInt(),
+        button_1_selected = 0xFFA3C1FF.toInt(),
         button_2 = 0xFF2AC3DE.toInt(),
         danger = 0xFFF7768E.toInt(),
         collapsible_header = 0xFF7AA2F7.toInt(),
-        task_frequency = 0xFF73DACA.toInt(),
-        progressbar = 0xFF2F3B63.toInt(),
+        progressbar = 0xFF34456B.toInt(),
     )
 
     fun paletteFor(theme: String, context: android.content.Context? = null): Palette =
@@ -201,7 +195,10 @@ object ThemeManager {
             bg_3 = get(PrefsManager.PrefKeys.APP_THEME_BG_3, base.bg_3),
             bg_4 = get(PrefsManager.PrefKeys.APP_THEME_BG_4, base.bg_4),
             bg_display = get(PrefsManager.PrefKeys.APP_THEME_BG_DISPLAY, base.bg_display),
-            media_background = get(PrefsManager.PrefKeys.APP_THEME_MEDIA_BACKGROUND, base.media_background),
+            media_background = get(
+                PrefsManager.PrefKeys.APP_THEME_MEDIA_BACKGROUND,
+                base.media_background
+            ),
             accent_1 = get(PrefsManager.PrefKeys.APP_THEME_ACCENT_1, base.accent_1),
             accent_2 = get(PrefsManager.PrefKeys.APP_THEME_ACCENT_2, base.accent_2),
             accent_3 = get(PrefsManager.PrefKeys.APP_THEME_ACCENT_3, base.accent_3),
@@ -219,10 +216,6 @@ object ThemeManager {
                 base.collapsible_header
             ),
             progressbar = get(PrefsManager.PrefKeys.APP_THEME_PROGRESS_BAR, base.progressbar),
-            task_frequency = get(
-                PrefsManager.PrefKeys.APP_THEME_TASK_FREQUENCY,
-                base.task_frequency
-            ),
         )
     }
 
@@ -253,6 +246,27 @@ object ThemeManager {
         palette: Palette,
         typeface: android.graphics.Typeface?
     ) {
+        // Icon tinting — ImageView src drawables use @color/* fill colors which don't
+        // update automatically when the palette changes. We apply an imageTintList so
+        // the color is remapped through the same mapColor logic used everywhere else.
+        if (view is ImageView) {
+            val currentTint = view.imageTintList?.defaultColor
+            if (currentTint != null) {
+                // Already has a tint — remap it to the new palette slot
+                val mapped = mapColor(context, currentTint, palette)
+                if (mapped != null) {
+                    view.imageTintList = android.content.res.ColorStateList.valueOf(mapped)
+                }
+            } else {
+                // No tint set yet — seed from the drawable's fill color resource so
+                // subsequent theme switches can remap it correctly.
+                val seedColor = resolveDrawableFillColor(context, view) ?: return
+                val mapped = mapColor(context, seedColor, palette) ?: seedColor
+                view.imageTintList = android.content.res.ColorStateList.valueOf(mapped)
+            }
+            return
+        }
+
         // Font + text color
         if (view is TextView) {
             typeface?.let { view.typeface = it }
@@ -361,6 +375,16 @@ object ThemeManager {
             DRACULA.accent_1, MELANGE.accent_1, TOKYO_NIGHT.accent_1, custom.accent_1,
             context.resources.getColor(R.color.accent_1) -> palette.accent_1
 
+            // accent_2
+            MAKO.accent_2, RAMA.accent_2, CATPPUCCIN_MOCHA.accent_2,
+            DRACULA.accent_2, MELANGE.accent_2, TOKYO_NIGHT.accent_2, custom.accent_2,
+            context.resources.getColor(R.color.accent_2) -> palette.accent_2
+
+            // accent_3
+            MAKO.accent_3, RAMA.accent_3, CATPPUCCIN_MOCHA.accent_3,
+            DRACULA.accent_3, MELANGE.accent_3, TOKYO_NIGHT.accent_3, custom.accent_3,
+            context.resources.getColor(R.color.accent_3) -> palette.accent_3
+
             // collapsible_header
             MAKO.collapsible_header, RAMA.collapsible_header, CATPPUCCIN_MOCHA.collapsible_header,
             DRACULA.collapsible_header, MELANGE.collapsible_header, TOKYO_NIGHT.collapsible_header, custom.collapsible_header,
@@ -381,16 +405,23 @@ object ThemeManager {
             DRACULA.progressbar, MELANGE.progressbar, TOKYO_NIGHT.progressbar, custom.progressbar,
             context.resources.getColor(R.color.progress) -> palette.progressbar
 
-            // Task Frequency
-            MAKO.task_frequency, RAMA.task_frequency, CATPPUCCIN_MOCHA.task_frequency,
-            DRACULA.task_frequency, MELANGE.task_frequency, TOKYO_NIGHT.task_frequency, custom.task_frequency,
-            context.resources.getColor(R.color.task_frequency) -> palette.task_frequency
-
             else -> null
         }
     }
 
     private fun resolveDrawableColor(drawable: android.graphics.drawable.Drawable): Int? {
         return if (drawable is android.graphics.drawable.ColorDrawable) drawable.color else null
+    }
+
+    /**
+     * Reads the tint color seeded by android:tint in the layout XML.
+     * Returns null if no tint has been set (icon will be skipped this pass).
+     */
+    private fun resolveDrawableFillColor(context: Context, view: ImageView): Int? {
+        // android:tint in XML is exposed as imageTintList — but we already handle
+        // the tintList != null case before calling this. This path is only reached
+        // when no tint is set at all, which shouldn't happen once the layouts are
+        // updated. Return null so we skip safely rather than guess.
+        return null
     }
 }

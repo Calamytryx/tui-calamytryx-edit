@@ -108,23 +108,18 @@
                             style="@style/ColorPickerBtn" />
 
                         <com.rama.tui.widgets.WdColorPicker
-                            android:id="@+id/bg_1"
-                            app:text="@string/colorpicker_theme_background_1"
-                            style="@style/ColorPickerBtn" />
-
-                        <com.rama.tui.widgets.WdColorPicker
                             android:id="@+id/progressbar"
                             app:text="@string/colorpicker_theme_progressbar"
                             style="@style/ColorPickerBtn" />
 
                         <com.rama.tui.widgets.WdColorPicker
-                            android:id="@+id/task_frequency"
-                            app:text="@string/colorpicker_theme_task_frequency"
+                            android:id="@+id/disabled"
+                            app:text="@string/colorpicker_theme_disabled"
                             style="@style/ColorPickerBtn" />
 
                         <com.rama.tui.widgets.WdColorPicker
-                            android:id="@+id/disabled"
-                            app:text="@string/colorpicker_theme_disabled"
+                            android:id="@+id/bg_1"
+                            app:text="@string/colorpicker_theme_background_1"
                             style="@style/ColorPickerBtn" />
 
                         <com.rama.tui.widgets.WdColorPicker
@@ -135,6 +130,21 @@
                         <com.rama.tui.widgets.WdColorPicker
                             android:id="@+id/bg_3"
                             app:text="@string/colorpicker_theme_background_3"
+                            style="@style/ColorPickerBtn" />
+
+                        <com.rama.tui.widgets.WdColorPicker
+                            android:id="@+id/bg_4"
+                            app:text="@string/colorpicker_theme_background_4"
+                            style="@style/ColorPickerBtn" />
+
+                        <com.rama.tui.widgets.WdColorPicker
+                            android:id="@+id/bg_display"
+                            app:text="@string/colorpicker_theme_bg_display"
+                            style="@style/ColorPickerBtn" />
+
+                        <com.rama.tui.widgets.WdColorPicker
+                            android:id="@+id/media_background"
+                            app:text="@string/colorpicker_theme_media_background"
                             style="@style/ColorPickerBtn" />
 
                         <com.rama.tui.widgets.WdColorPicker

@@ -165,6 +165,10 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
         activity.findViewById<WdColorPicker>(R.id.accent).setColor(palette.accent_1)
         activity.findViewById<WdColorPicker>(R.id.bg_2).setColor(palette.bg_2)
         activity.findViewById<WdColorPicker>(R.id.bg_3).setColor(palette.bg_3)
+        activity.findViewById<WdColorPicker>(R.id.bg_4).setColor(palette.bg_4)
+        activity.findViewById<WdColorPicker>(R.id.bg_display).setColor(palette.bg_display)
+        activity.findViewById<WdColorPicker>(R.id.media_background)
+            .setColor(palette.media_background)
         activity.findViewById<WdColorPicker>(R.id.bg_1).setColor(palette.bg_1)
         activity.findViewById<WdColorPicker>(R.id.input).setColor(palette.input)
         activity.findViewById<WdColorPicker>(R.id.btn_1).setColor(palette.button_1)
@@ -174,7 +178,6 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
         activity.findViewById<WdColorPicker>(R.id.danger).setColor(palette.danger)
         activity.findViewById<WdColorPicker>(R.id.progressbar).setColor(palette.progressbar)
         activity.findViewById<WdColorPicker>(R.id.disabled).setColor(palette.disabled)
-        activity.findViewById<WdColorPicker>(R.id.task_frequency).setColor(palette.task_frequency)
     }
 
     private fun setupCustomTheme() {
@@ -194,6 +197,11 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
                 PrefsManager.PrefKeys.APP_THEME_BG_1 to activity.findViewById<WdColorPicker>(R.id.bg_1),
                 PrefsManager.PrefKeys.APP_THEME_BG_2 to activity.findViewById<WdColorPicker>(R.id.bg_2),
                 PrefsManager.PrefKeys.APP_THEME_BG_3 to activity.findViewById<WdColorPicker>(R.id.bg_3),
+                PrefsManager.PrefKeys.APP_THEME_BG_4 to activity.findViewById<WdColorPicker>(R.id.bg_4),
+                PrefsManager.PrefKeys.APP_THEME_BG_DISPLAY to activity.findViewById<WdColorPicker>(R.id.bg_display),
+                PrefsManager.PrefKeys.APP_THEME_MEDIA_BACKGROUND to activity.findViewById<WdColorPicker>(
+                    R.id.media_background
+                ),
                 PrefsManager.PrefKeys.APP_THEME_INPUT to activity.findViewById<WdColorPicker>(R.id.input),
                 PrefsManager.PrefKeys.APP_THEME_BUTTON_1 to activity.findViewById<WdColorPicker>(R.id.btn_1),
                 PrefsManager.PrefKeys.APP_THEME_BUTTON_1_SELECTED to activity.findViewById<WdColorPicker>(
@@ -202,9 +210,6 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
                 PrefsManager.PrefKeys.APP_THEME_BUTTON_2 to activity.findViewById<WdColorPicker>(R.id.btn_2),
                 PrefsManager.PrefKeys.APP_THEME_DANGER to activity.findViewById<WdColorPicker>(R.id.danger),
                 PrefsManager.PrefKeys.APP_THEME_DISABLED to activity.findViewById<WdColorPicker>(R.id.disabled),
-                PrefsManager.PrefKeys.APP_THEME_TASK_FREQUENCY to activity.findViewById<WdColorPicker>(
-                    R.id.task_frequency
-                ),
                 PrefsManager.PrefKeys.APP_THEME_PROGRESS_BAR to activity.findViewById<WdColorPicker>(
                     R.id.progressbar
                 ),
