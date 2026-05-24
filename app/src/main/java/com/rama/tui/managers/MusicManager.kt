@@ -134,9 +134,17 @@ object MusicManager {
                 android.media.AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                     .setOnAudioFocusChangeListener { focus ->
                         when (focus) {
-                            AudioManager.AUDIOFOCUS_LOSS -> if (isPlaying) togglePlayPause()
-                            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isPlaying) togglePlayPause()
-                            AudioManager.AUDIOFOCUS_GAIN -> if (!isPlaying) togglePlayPause()
+                            AudioManager.AUDIOFOCUS_LOSS -> {
+                                if (isPlaying) {
+                                    togglePlayPause()
+                                }
+                            }
+
+                            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                                if (isPlaying) {
+                                    togglePlayPause()
+                                }
+                            }
                         }
                     }.build().also { am.requestAudioFocus(it) }
         } else {
@@ -144,9 +152,17 @@ object MusicManager {
             am.requestAudioFocus(
                 { focus ->
                     when (focus) {
-                        AudioManager.AUDIOFOCUS_LOSS -> if (isPlaying) togglePlayPause()
-                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (isPlaying) togglePlayPause()
-                        AudioManager.AUDIOFOCUS_GAIN -> if (!isPlaying) togglePlayPause()
+                        AudioManager.AUDIOFOCUS_LOSS -> {
+                            if (isPlaying) {
+                                togglePlayPause()
+                            }
+                        }
+
+                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                            if (isPlaying) {
+                                togglePlayPause()
+                            }
+                        }
                     }
                 },
                 AudioManager.STREAM_MUSIC,
