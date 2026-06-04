@@ -11,7 +11,7 @@ class SettingsListController(private val activity: SettingsActivity) {
 
     private val prefs get() = activity.prefs
 
-    fun setup() {
+    fun setup(onSortChanged: () -> Unit = {}) {
         val sortGroup = activity.findViewById<RadioGroup>(R.id.list_sort)
 
         // Restore saved sort style
@@ -29,6 +29,7 @@ class SettingsListController(private val activity: SettingsActivity) {
                 else -> SortStyle.AZ
             }
             prefs.setString(PrefKeys.LIST_SORT_STYLE, newStyle)
+            onSortChanged()
         }
     }
 }

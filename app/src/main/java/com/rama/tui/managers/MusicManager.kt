@@ -194,7 +194,8 @@ object MusicManager {
     fun loadTracks(context: Context): Boolean {
         if (!hasPermission(context)) return false
         val prefs = PrefsManager.getInstance(context)
-        val sortStyle = prefs.getString(PrefsManager.PrefKeys.LIST_SORT_STYLE, PrefsManager.SortStyle.AZ)
+        val sortStyle =
+            prefs.getString(PrefsManager.PrefKeys.LIST_SORT_STYLE, PrefsManager.SortStyle.AZ)
         val keepTogether = prefs.getBoolean(PrefsManager.PrefKeys.LIST_SORT_KEEP_TOGETHER, false)
 
         val dirs = getStorageRoots(context)
@@ -204,6 +205,17 @@ object MusicManager {
         tracks = allTracks
         if (tracks.isNotEmpty() && currentIndex < 0) currentIndex = 0
         return true
+    }
+
+    fun reSort(context: Context) {
+        val prefs = PrefsManager.getInstance(context)
+        val sortStyle =
+            prefs.getString(PrefsManager.PrefKeys.LIST_SORT_STYLE, PrefsManager.SortStyle.AZ)
+        val keepTogether = prefs.getBoolean(PrefsManager.PrefKeys.LIST_SORT_KEEP_TOGETHER, false)
+        allTracks = sortTracks(allTracks, sortStyle, keepTogether)
+        tracks = allTracks
+        currentIndex = tracks.indexOf(currentTrack).coerceAtLeast(0)
+        onStateChanged?.invoke()
     }
 
     /** Sort tracks by title (az/za), optionally grouping files from the same folder together. */
