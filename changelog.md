@@ -4,6 +4,7 @@
 
 - Add zoom
 - Add theme: catppuccin latte
+- Add custom sort
 
 ## 2
 
