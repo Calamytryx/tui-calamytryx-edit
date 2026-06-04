@@ -3,17 +3,16 @@
     <string name="activity_settings_label">Settings</string>
     <string name="activity_about_label">About</string>
 
-    <!-- H2 -->
+    <!-- Heading -->
     <string name="h2_title_edit_track">Edit track</string>
     <string name="h2_color_picker">Pick a Color</string>
-
-    <!-- H3 -->
     <string name="h2_icons">Icons</string>
     <string name="h2_fonts">Fonts</string>
     <string name="h2_themes">Themes</string>
     <string name="h2_language">Language</string>
     <string name="h2_system">System</string>
     <string name="h2_app">App</string>
+    <string name="h2_list">List</string>
 
     <!-- Button -->
     <string name="btn_go_back">Go Back</string>
@@ -54,6 +53,8 @@
     <string name="radio_theme_rama">Rama</string>
     <string name="radio_theme_mako">Mako</string>
     <string name="radio_theme_custom">Custom</string>
+    <string name="radio_sort_a_z">Sort a-z</string>
+    <string name="radio_sort_z_a">Sort z-a</string>
 
     <!-- Checkbox -->
     <string name="checkbox_show_system_bar">Show system bar</string>
@@ -100,6 +101,7 @@
     <string name="altdescr_edit_task">Edit task</string>
     <string name="altdescr_ascend">Move up</string>
     <string name="altdescr_descend">Move down</string>
+    <string name="altdescr_folder">Folder</string>
 
     <!-- APP -->
     <string name="app_name" translatable="false">Tui</string>
@@ -142,5 +144,7 @@
     <!-- Groups -->
     <string name="settings_section_expand_indicator" translatable="false">[+]</string>
     <string name="settings_section_collapse_indicator" translatable="false">[-]</string>
+    <string name="checkbox_keep_files_from_the_same_folder_together">Keep files from the same folder together</string>
+
 </resources>
 

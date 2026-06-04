@@ -236,6 +236,35 @@
 
             </com.rama.tui.widgets.WdCollapsibleSection>
 
+            <com.rama.tui.widgets.WdCollapsibleSection
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:key="SETTINGS_SECTION_LIST"
+                app:header="@string/h2_list"
+                app:defaultExpanded="true">
+
+                <com.rama.tui.widgets.WdCheckbox
+                    android:id="@+id/keep_folder_files_together"
+                    android:text="@string/checkbox_keep_files_from_the_same_folder_together"
+                    style="@style/Checkbox" />
+
+                <RadioGroup
+                    android:id="@+id/list_sort"
+                    style="@style/RadioGroup">
+
+                    <RadioButton
+                        android:id="@+id/sort_az"
+                        android:text="@string/radio_sort_a_z"
+                        style="@style/Radio" />
+
+                    <RadioButton
+                        android:id="@+id/sort_za"
+                        android:text="@string/radio_sort_z_a"
+                        style="@style/Radio" />
+                </RadioGroup>
+
+            </com.rama.tui.widgets.WdCollapsibleSection>
+
             <!--System-->
             <com.rama.tui.widgets.WdCollapsibleSection
                 android:layout_width="match_parent"
