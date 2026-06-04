@@ -1,10 +1,7 @@
 ![Preview](./docs/img/tui_header_1200x630.svg)
 
 <p align="center">
-  <a href="https://github.com/rama-io/tui/stargazers"><img src="https://img.shields.io/github/stars/rama-io/tui?colorA=363a4f&colorB=b7bdf8&style=for-the-badge"></a>
-  <a href="https://github.com/rama-io/tui/issues"><img src="https://img.shields.io/github/issues/rama-io/tui?colorA=363a4f&colorB=f5a97f&style=for-the-badge"></a>
-  <a href="https://github.com/rama-io/tui/releases/latest"><img src="https://img.shields.io/github/v/release/rama-io/tui?colorA=363a4f&colorB=a6da95&style=for-the-badge" alt="Release"></a>
-  <a href="https://github.com/rama-io/tui/releases"><img src="https://img.shields.io/github/downloads/rama-io/tui/total?colorA=363a4f&colorB=ea999c&style=for-the-badge" alt="Downloads"></a>
+  <img src="https://rama-io.github.io/img/badge_tui.svg">
 </p>
 
 # Tui
