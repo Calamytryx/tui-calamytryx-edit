@@ -1,8 +1,5 @@
 ![Preview](./docs/img/tui_header_1200x630.svg)
-
-<p align="center">
-  <img src="https://rama-io.github.io/img/badge_tui.svg">
-</p>
+![Badge](https://rama-io.github.io/img/badge_tui.svg)
 
 # Tui
 
