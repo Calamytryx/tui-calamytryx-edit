@@ -2,7 +2,13 @@ package com.rama.tui.activities
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.Context
+import android.content.Intent
 import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.DocumentsContract
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
@@ -15,10 +21,12 @@ import android.widget.EditText
 import android.widget.MultiAutoCompleteTextView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.documentfile.provider.DocumentFile
 import com.rama.tui.R
 import com.rama.tui.Track
 import com.rama.tui.managers.FontManager
 import com.rama.tui.managers.MusicManager
+import com.rama.tui.managers.PrefsManager
 import com.rama.tui.managers.ThemeManager
 import java.io.File
 
@@ -26,7 +34,102 @@ object TrackEditDialog {
 
     private const val TAG = "TrackEditDialog"
 
-    fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int) = Unit
+    internal const val REQ_SD_TREE = 2001
+
+    // Pending rename held across the SAF picker round-trip
+    private var pendingRename: (() -> Unit)? = null
+
+    fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode != REQ_SD_TREE) return
+        if (resultCode != Activity.RESULT_OK || data == null) {
+            pendingRename = null
+            Toast.makeText(activity, "SD card access denied", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val treeUri = data.data ?: run {
+            pendingRename = null
+            return
+        }
+        // Persist permission so we don't ask again
+        activity.contentResolver.takePersistableUriPermission(
+            treeUri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        )
+        PrefsManager.getInstance(activity)
+            .setString(PrefsManager.PrefKeys.SD_TREE_URI, treeUri.toString())
+
+        // Execute the deferred rename now that we have access
+        pendingRename?.invoke()
+        pendingRename = null
+    }
+
+    // ── SAF helpers ──────────────────────────────────────────────────────────
+
+    /** True if [file] lives on primary external storage (writable via File APIs). */
+    private fun isOnPrimaryStorage(file: File): Boolean {
+        val primary = Environment.getExternalStorageDirectory().canonicalPath
+        return file.canonicalPath.startsWith(primary)
+    }
+
+    /**
+     * Returns a persisted SAF tree URI for the volume that [file] lives on,
+     * or null if none has been granted yet.
+     */
+    private fun getSafTreeUri(context: Context, file: File): Uri? {
+        val raw = PrefsManager.getInstance(context)
+            .getString(PrefsManager.PrefKeys.SD_TREE_URI, "") ?: return null
+        val treeUri = Uri.parse(raw)
+
+        // Verify we still hold the permission
+        val persisted = context.contentResolver.persistedUriPermissions
+        if (persisted.none { it.uri == treeUri && it.isWritePermission }) return null
+
+        return treeUri
+    }
+
+    /**
+     * Renames [src] to [dest] using DocumentFile SAF APIs.
+     * The tree URI must already cover the directory containing [src].
+     */
+    private fun renameViaSaf(context: Context, treeUri: Uri, src: File, newName: String): Boolean {
+        return try {
+            val tree = DocumentFile.fromTreeUri(context, treeUri) ?: return false
+
+            // Walk to the directory containing src
+            val primary = Environment.getExternalStorageDirectory().canonicalPath
+            val volumeRoot = src.canonicalPath
+                .removePrefix(tree.uri.path?.substringAfterLast("/primary:") ?: "")
+            // Find the file by iterating from the tree root
+            val docFile = findDocumentFile(tree, src) ?: return false
+            docFile.renameTo(newName)
+        } catch (e: Exception) {
+            Log.e(TAG, "renameViaSaf failed: ${e.message}")
+            false
+        }
+    }
+
+    /** Recursively locates the [DocumentFile] matching [target] under [tree]. */
+    private fun findDocumentFile(tree: DocumentFile, target: File): DocumentFile? {
+        // Build relative path segments from the tree root down to the file
+        val treePathEncoded = tree.uri.lastPathSegment ?: return null
+        // treePathEncoded looks like "0B81-0B31:" or "primary:"
+        val volumeId = treePathEncoded.trimEnd(':')
+
+        val canonical = target.canonicalPath
+        // Find the volume mount point by matching the start of the canonical path
+        val volumeMount = File("/storage/$volumeId")
+            .takeIf { it.exists() }
+            ?: return null
+
+        val relative = canonical.removePrefix(volumeMount.canonicalPath).trimStart('/')
+        val segments = relative.split("/").filter { it.isNotEmpty() }
+
+        var current: DocumentFile = tree
+        for (segment in segments) {
+            current = current.listFiles().firstOrNull { it.name == segment } ?: return null
+        }
+        return current
+    }
 
     private fun normalizeCsv(input: String): String {
         return input
@@ -147,7 +250,7 @@ object TrackEditDialog {
             }
         }
 
-        // Rename
+        // Rename: try atomic renameTo first; fall back to copy+delete for cross-fs or API quirks
         updateBtn.setOnClickListener {
             val newTitle = titleInput.text.toString().trim()
             val newArtists = normalizeCsv(artistInput.text.toString())
@@ -173,11 +276,16 @@ object TrackEditDialog {
             } + ".${track.ext}"
 
             val dest = File(track.file.parent, newFileName)
-            if (track.file.renameTo(dest)) {
-                Toast.makeText(activity, "Track renamed", Toast.LENGTH_SHORT).show()
-                onChanged()
-            } else {
-                Toast.makeText(activity, "Could not rename file", Toast.LENGTH_SHORT).show()
+
+            renameFile(activity, track.file, dest) { ok ->
+                if (ok) {
+                    Toast.makeText(activity, "Track renamed", Toast.LENGTH_SHORT).show()
+                    onChanged()
+                    dialog.dismiss()
+                } else if (pendingRename == null) {
+                    // Only show failure if we didn't just launch the SAF picker
+                    Toast.makeText(activity, "Could not rename file", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -221,10 +329,77 @@ object TrackEditDialog {
     }
 
     /**
-     * Strips all embedded tags using the *static* AudioFileIO.delete(audioFile).
-     * This removes tag headers from the file on disk.
-     * Do NOT call the instance audioFile.delete() — that deletes the file itself.
+     * Renames [src] to [dest], routing through SAF for SD card paths on API 21+.
+     * If SAF permission hasn't been granted yet, launches the tree picker and
+     * stores [onComplete] to retry after the user grants access.
+     * Returns true if the rename completed synchronously, false if it failed or
+     * was deferred (SAF picker launched).
      */
+    private fun renameFile(
+        activity: Activity,
+        src: File,
+        dest: File,
+        onComplete: (success: Boolean) -> Unit,
+    ) {
+        if (src == dest) {
+            onComplete(true); return
+        }
+
+        // Primary storage: use File APIs directly
+        if (isOnPrimaryStorage(src)) {
+            onComplete(renameFileNative(src, dest))
+            return
+        }
+
+        // SD card path — need SAF
+        val treeUri = getSafTreeUri(activity, src)
+        if (treeUri != null) {
+            val ok = renameViaSaf(activity, treeUri, src, dest.name)
+            onComplete(ok)
+        } else {
+            // No permission yet — stash the rename and launch the picker
+            pendingRename = {
+                val uri = getSafTreeUri(activity, src)
+                if (uri != null) {
+                    val ok = renameViaSaf(activity, uri, src, dest.name)
+                    onComplete(ok)
+                } else {
+                    onComplete(false)
+                }
+            }
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Pre-select the SD card volume in the picker
+                val volumeId = src.canonicalPath
+                    .removePrefix("/storage/").substringBefore("/")
+                intent.putExtra(
+                    DocumentsContract.EXTRA_INITIAL_URI,
+                    Uri.parse("content://com.android.externalstorage.documents/tree/$volumeId%3A")
+                )
+            }
+            activity.startActivityForResult(intent, REQ_SD_TREE)
+        }
+    }
+
+    /** Atomic rename with copy+delete fallback, for primary storage only. */
+    private fun renameFileNative(src: File, dest: File): Boolean {
+        if (src.renameTo(dest) && dest.exists()) return true
+        return try {
+            src.copyTo(dest, overwrite = true)
+            if (dest.length() == src.length()) {
+                src.delete(); true
+            } else {
+                dest.delete(); false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "renameFileNative fallback failed: ${e.message}")
+            dest.delete(); false
+        }
+    }
+
+    /* This removes tag headers from the file on disk.
+    * Do NOT call the instance audioFile.delete(), that deletes the file itself.
+    */
     private fun stripEmbeddedMetadata(activity: Activity, track: Track): Boolean {
         val supported = setOf("mp3", "m4a", "aac", "flac", "ogg", "wav", "aiff", "wma")
         if (track.ext.lowercase() !in supported) {

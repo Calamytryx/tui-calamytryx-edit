@@ -16,6 +16,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import com.rama.tui.CsActivity
 import com.rama.tui.MediaPlaybackService
 import com.rama.tui.R
@@ -148,11 +149,17 @@ class MainActivity : CsActivity() {
     private fun loadOrRequestTracks() {
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !MusicManager.hasPermission(this) -> {
-                val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                    Manifest.permission.READ_MEDIA_AUDIO
-                else
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                requestPermissions(arrayOf(permission), REQ_AUDIO)
+                val permissions = when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ->
+                        arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
+                        arrayOf(
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        )
+                    else -> emptyArray()
+                }
+                ActivityCompat.requestPermissions(this, permissions, REQ_AUDIO)
             }
 
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
@@ -173,7 +180,8 @@ class MainActivity : CsActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == REQ_AUDIO && grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == REQ_AUDIO && grantResults.isNotEmpty() &&
+            grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
             loadOrRequestTracks()
         }
     }
@@ -191,7 +199,7 @@ class MainActivity : CsActivity() {
             (listView.adapter as? TrackAdapter)?.updateTracks(MusicManager.tracks)
             refreshUi()
         }
-        TrackEditDialog.onActivityResult(this, requestCode, resultCode)
+        TrackEditDialog.onActivityResult(this, requestCode, resultCode, data)
     }
 
     private fun loadTracks() {

@@ -32,6 +32,8 @@ class PrefsManager private constructor(context: Context) {
         const val LIST_SORT_STYLE = "list:sort:style"
         const val LIST_SORT_KEEP_TOGETHER = "list:sort:keep_together"
 
+        const val SD_TREE_URI = "storage:sd_tree_uri"
+
         const val APP_THEME_NAME = "app:theme:name"
         const val APP_THEME_H1 = "app:theme:h1"
         const val APP_THEME_FOREGROUND = "app:theme:foreground"
