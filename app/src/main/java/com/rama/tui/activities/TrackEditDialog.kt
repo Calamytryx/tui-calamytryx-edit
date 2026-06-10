@@ -21,7 +21,6 @@ import android.widget.EditText
 import android.widget.MultiAutoCompleteTextView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.documentfile.provider.DocumentFile
 import com.rama.tui.R
 import com.rama.tui.Track
 import com.rama.tui.managers.FontManager
@@ -88,47 +87,32 @@ object TrackEditDialog {
     }
 
     /**
-     * Renames [src] to [dest] using DocumentFile SAF APIs.
-     * The tree URI must already cover the directory containing [src].
+     * Renames [src] to [dest] using raw DocumentsContract SAF APIs (no DocumentFile needed).
      */
     private fun renameViaSaf(context: Context, treeUri: Uri, src: File, newName: String): Boolean {
         return try {
-            val tree = DocumentFile.fromTreeUri(context, treeUri) ?: return false
-
-            // Walk to the directory containing src
-            val primary = Environment.getExternalStorageDirectory().canonicalPath
-            val volumeRoot = src.canonicalPath
-                .removePrefix(tree.uri.path?.substringAfterLast("/primary:") ?: "")
-            // Find the file by iterating from the tree root
-            val docFile = findDocumentFile(tree, src) ?: return false
-            docFile.renameTo(newName)
+            val docUri = findDocumentUri(context, treeUri, src) ?: return false
+            DocumentsContract.renameDocument(context.contentResolver, docUri, newName) != null
         } catch (e: Exception) {
             Log.e(TAG, "renameViaSaf failed: ${e.message}")
             false
         }
     }
 
-    /** Recursively locates the [DocumentFile] matching [target] under [tree]. */
-    private fun findDocumentFile(tree: DocumentFile, target: File): DocumentFile? {
-        // Build relative path segments from the tree root down to the file
-        val treePathEncoded = tree.uri.lastPathSegment ?: return null
-        // treePathEncoded looks like "0B81-0B31:" or "primary:"
-        val volumeId = treePathEncoded.trimEnd(':')
-
-        val canonical = target.canonicalPath
-        // Find the volume mount point by matching the start of the canonical path
-        val volumeMount = File("/storage/$volumeId")
-            .takeIf { it.exists() }
-            ?: return null
-
-        val relative = canonical.removePrefix(volumeMount.canonicalPath).trimStart('/')
-        val segments = relative.split("/").filter { it.isNotEmpty() }
-
-        var current: DocumentFile = tree
-        for (segment in segments) {
-            current = current.listFiles().firstOrNull { it.name == segment } ?: return null
-        }
-        return current
+    /**
+     * Resolves the document URI for [target] under [treeUri] by building the
+     * document ID from the volume ID + relative path.
+     */
+    private fun findDocumentUri(context: Context, treeUri: Uri, target: File): Uri? {
+        // treeUri last path segment looks like "0B81-0B31:" or "primary:"
+        val treeDocId = DocumentsContract.getTreeDocumentId(treeUri)
+        val volumeId = treeDocId.trimEnd(':')
+        val volumeMount = File("/storage/$volumeId").takeIf { it.exists() } ?: return null
+        val relative = target.canonicalPath
+            .removePrefix(volumeMount.canonicalPath)
+            .trimStart('/')
+        val docId = "$volumeId:$relative"
+        return DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
     }
 
     private fun normalizeCsv(input: String): String {

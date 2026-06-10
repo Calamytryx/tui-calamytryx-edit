@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.core.content.withStyledAttributes
 import com.rama.tui.R
 
 class WdRange @JvmOverloads constructor(
@@ -34,17 +33,17 @@ class WdRange @JvmOverloads constructor(
         container = findViewById(R.id.container)
 
         attrs?.let {
-            context.withStyledAttributes(it, R.styleable.WdRange) {
-
+            val ta = context.obtainStyledAttributes(it, R.styleable.WdRange)
+            try {
                 val values: List<String> = when {
-                    hasValue(R.styleable.WdRange_valuesArray) -> {
-                        val arrayRes = getResourceId(R.styleable.WdRange_valuesArray, 0)
+                    ta.hasValue(R.styleable.WdRange_valuesArray) -> {
+                        val arrayRes = ta.getResourceId(R.styleable.WdRange_valuesArray, 0)
                         if (arrayRes != 0) context.resources.getStringArray(arrayRes).toList()
                         else emptyList()
                     }
 
-                    hasValue(R.styleable.WdRange_values) -> {
-                        getString(R.styleable.WdRange_values)
+                    ta.hasValue(R.styleable.WdRange_values) -> {
+                        ta.getString(R.styleable.WdRange_values)
                             ?.split(",")
                             ?.map { it.trim() }
                             ?.filter { it.isNotEmpty() }
@@ -55,6 +54,8 @@ class WdRange @JvmOverloads constructor(
                 }
 
                 setValues(values)
+            } finally {
+                ta.recycle()
             }
         }
     }

@@ -4,7 +4,6 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
-import androidx.core.content.ContextCompat
 import com.rama.tui.R
 import com.rama.tui.activities.SettingsActivity
 import com.rama.tui.managers.PrefsManager
@@ -29,7 +28,7 @@ class SettingsLanguageController(private val activity: SettingsActivity) {
                 id = View.generateViewId()
                 text = label
                 textSize = 16f
-                setTextColor(ContextCompat.getColor(activity, R.color.foreground))
+                setTextColor(activity.resources.getColor(R.color.foreground))
                 val params = RadioGroup.LayoutParams(
                     RadioGroup.LayoutParams.MATCH_PARENT,
                     RadioGroup.LayoutParams.WRAP_CONTENT

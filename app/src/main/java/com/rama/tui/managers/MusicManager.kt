@@ -8,19 +8,17 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Environment
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import androidx.core.content.ContextCompat
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import com.rama.tui.MediaButtonReceiver
 import com.rama.tui.MediaPlaybackService
 import com.rama.tui.Track
-import com.rama.tui.managers.PrefsManager
 import java.io.File
 
 object MusicManager {
 
     private var player: MediaPlayer? = null
-    private var mediaSession: MediaSessionCompat? = null
+    private var mediaSession: MediaSession? = null
     private var audioFocusRequest: android.media.AudioFocusRequest? = null
     private var appContext: Context? = null
 
@@ -69,28 +67,27 @@ object MusicManager {
             flags
         )
 
-        mediaSession =
-            MediaSessionCompat(context, "TuiMediaSession", receiver, mediaButtonIntent).apply {
-                setMediaButtonReceiver(mediaButtonIntent)
-                setCallback(object : MediaSessionCompat.Callback() {
-                    override fun onPlay() {
-                        if (!isPlaying) togglePlayPause()
-                    }
+        mediaSession = MediaSession(context, "TuiMediaSession").apply {
+            setMediaButtonReceiver(mediaButtonIntent)
+            setCallback(object : MediaSession.Callback() {
+                override fun onPlay() {
+                    if (!isPlaying) togglePlayPause()
+                }
 
-                    override fun onPause() {
-                        if (isPlaying) togglePlayPause()
-                    }
+                override fun onPause() {
+                    if (isPlaying) togglePlayPause()
+                }
 
-                    override fun onSkipToNext() {
-                        next()
-                    }
+                override fun onSkipToNext() {
+                    next()
+                }
 
-                    override fun onSkipToPrevious() {
-                        prev()
-                    }
-                })
-                isActive = true
-            }
+                override fun onSkipToPrevious() {
+                    prev()
+                }
+            })
+            isActive = true
+        }
 
         MediaPlaybackService.start(context)
     }
@@ -102,16 +99,16 @@ object MusicManager {
 
     private fun updatePlaybackState() {
         val state =
-            if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
+            if (isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED
         mediaSession?.setPlaybackState(
-            PlaybackStateCompat.Builder()
+            PlaybackState.Builder()
                 .setState(state, player?.currentPosition?.toLong() ?: 0L, 1f)
                 .setActions(
-                    PlaybackStateCompat.ACTION_PLAY or
-                            PlaybackStateCompat.ACTION_PAUSE or
-                            PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                            PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                    PlaybackState.ACTION_PLAY or
+                            PlaybackState.ACTION_PAUSE or
+                            PlaybackState.ACTION_PLAY_PAUSE or
+                            PlaybackState.ACTION_SKIP_TO_NEXT or
+                            PlaybackState.ACTION_SKIP_TO_PREVIOUS
                 )
                 .build()
         )
@@ -183,10 +180,7 @@ object MusicManager {
         else
             Manifest.permission.READ_EXTERNAL_STORAGE
 
-        return ContextCompat.checkSelfPermission(
-            context,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED
+        return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 
     // region Track Loading

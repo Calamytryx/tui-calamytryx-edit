@@ -16,7 +16,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
 import com.rama.tui.CsActivity
 import com.rama.tui.MediaPlaybackService
 import com.rama.tui.R
@@ -159,7 +158,7 @@ class MainActivity : CsActivity() {
                         )
                     else -> emptyArray()
                 }
-                ActivityCompat.requestPermissions(this, permissions, REQ_AUDIO)
+                requestPermissions(permissions, REQ_AUDIO)
             }
 
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
