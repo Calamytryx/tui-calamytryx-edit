@@ -1,5 +1,11 @@
 # Changelog
 
+## 4
+
+- Fix media and storage permissions for API 21
+- Add list of available media folders in settings
+- Reduce the amount of dependencies
+
 ## 3
 
 - Add zoom
