@@ -115,6 +115,14 @@ class WdCollapsibleSection @JvmOverloads constructor(
         }
     }
 
+    fun addItem(view: View) {
+        content.addView(view)
+    }
+
+    fun clearItems() {
+        content.removeAllViews()
+    }
+
     private fun isExpanded(): Boolean {
         return content.visibility == View.VISIBLE
     }

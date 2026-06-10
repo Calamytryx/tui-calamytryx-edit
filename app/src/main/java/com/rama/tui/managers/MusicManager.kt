@@ -195,7 +195,15 @@ object MusicManager {
         val dirs = getStorageRoots(context)
         val raw = dirs.flatMap { scanDir(it) }
 
-        allTracks = sortTracks(raw, sortStyle, keepTogether)
+        // Persist the full folder list before filtering so settings can always show all folders
+        val allFolders = raw.mapNotNull { it.file.parent }.distinct().sorted().toSet()
+        prefs.setAllFolders(allFolders)
+
+        val disabledFolders = prefs.getDisabledFolders()
+        val filtered = if (disabledFolders.isEmpty()) raw
+            else raw.filter { it.file.parent !in disabledFolders }
+
+        allTracks = sortTracks(filtered, sortStyle, keepTogether)
         tracks = allTracks
         if (tracks.isNotEmpty() && currentIndex < 0) currentIndex = 0
         return true

@@ -64,6 +64,7 @@
             </com.rama.tui.widgets.WdCollapsibleSection>
 
             <com.rama.tui.widgets.WdCollapsibleSection
+                android:id="@+id/folders_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:key="SETTINGS_SECTION_FOLDERS"

@@ -34,6 +34,9 @@ class PrefsManager private constructor(context: Context) {
 
         const val SD_TREE_URI = "storage:sd_tree_uri"
 
+        const val DISABLED_FOLDERS = "folders:disabled"
+        const val ALL_FOLDERS = "folders:all"
+
         const val APP_THEME_NAME = "app:theme:name"
         const val APP_THEME_H1 = "app:theme:h1"
         const val APP_THEME_FOREGROUND = "app:theme:foreground"
@@ -175,6 +178,24 @@ class PrefsManager private constructor(context: Context) {
 
     fun setString(key: String, value: String) =
         prefs.edit().putString(key, value).apply()
+
+    fun getDisabledFolders(): Set<String> {
+        val raw = prefs.getString(PrefKeys.DISABLED_FOLDERS, "") ?: ""
+        return if (raw.isBlank()) emptySet() else raw.split("\n").filter { it.isNotBlank() }.toSet()
+    }
+
+    fun setDisabledFolders(folders: Set<String>) {
+        prefs.edit().putString(PrefKeys.DISABLED_FOLDERS, folders.joinToString("\n")).apply()
+    }
+
+    fun getAllFolders(): List<String> {
+        val raw = prefs.getString(PrefKeys.ALL_FOLDERS, "") ?: ""
+        return if (raw.isBlank()) emptyList() else raw.split("\n").filter { it.isNotBlank() }
+    }
+
+    fun setAllFolders(folders: Set<String>) {
+        prefs.edit().putString(PrefKeys.ALL_FOLDERS, folders.sorted().joinToString("\n")).apply()
+    }
 
     // Core builder
 
