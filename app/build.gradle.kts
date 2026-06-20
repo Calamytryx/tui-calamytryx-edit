@@ -15,7 +15,7 @@ android {
         applicationId = "com.rama.tui"
         minSdk = 21
         targetSdk = 36
-        versionCode = 4
+        versionCode = 5
         versionName = "$currentYear.$versionCode"
     }
 
@@ -33,12 +33,18 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             vcsInfo.include = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        create("beta") {
+            applicationIdSuffix = ".beta"
+            versionNameSuffix = "-beta"
+            isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("debug")
         }
         debug {
@@ -74,4 +80,5 @@ android {
 
 dependencies {
     implementation("net.jthink:jaudiotagger:3.0.1")
+    implementation(project(":bohio"))
 }

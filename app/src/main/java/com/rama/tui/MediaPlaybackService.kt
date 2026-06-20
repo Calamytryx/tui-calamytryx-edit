@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.IBinder
 import com.rama.tui.activities.MainActivity
 import com.rama.tui.managers.MusicManager
+import com.rama.bohio.R as BohioR
 
 class MediaPlaybackService : Service() {
 
@@ -133,24 +134,25 @@ class MediaPlaybackService : Service() {
 
         builder
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-        builder.setColor(resources.getColor(R.color.media_background))
+        builder.setColor(resources.getColor(BohioR.color.media_background))
             .setContentTitle(track?.title ?: "Not playing")
             .setContentText(track?.displayArtists?.ifEmpty { null } ?: "")
             .setContentIntent(openAppIntent)
             .setOngoing(true)
             .setShowWhen(false)
-            .addAction(R.drawable.icon_prev, "Previous", actionIntent(ACTION_PREV, 1))
+            .addAction(BohioR.drawable.px_prev, "Previous", actionIntent(ACTION_PREV, 1))
             .addAction(
-                if (isPlaying) R.drawable.icon_pause else R.drawable.icon_play,
+                if (isPlaying) BohioR.drawable.px_pause else BohioR.drawable.px_play,
                 if (isPlaying) "Pause" else "Play",
                 actionIntent(ACTION_PLAY_PAUSE, 2)
             )
-            .addAction(R.drawable.icon_next, "Next", actionIntent(ACTION_NEXT, 3))
+            .addAction(BohioR.drawable.px_next, "Next", actionIntent(ACTION_NEXT, 3))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setStyle(
                 Notification.MediaStyle()
                     .setShowActionsInCompactView(0, 1, 2)
+                    .setMediaSession(MusicManager.getSessionToken())
             )
             builder.setVisibility(Notification.VISIBILITY_PUBLIC)
         }

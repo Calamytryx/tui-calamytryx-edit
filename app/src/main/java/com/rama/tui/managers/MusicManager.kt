@@ -10,8 +10,10 @@ import android.os.Build
 import android.os.Environment
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.provider.MediaStore
 import com.rama.tui.MediaButtonReceiver
 import com.rama.tui.MediaPlaybackService
+import com.rama.tui.managers.PrefsManager.PrefSortStyle
 import com.rama.tui.Track
 import java.io.File
 
@@ -97,6 +99,10 @@ object MusicManager {
         mediaSession = null
     }
 
+    fun getSessionToken(): android.media.session.MediaSession.Token? {
+        return mediaSession?.sessionToken
+    }
+
     private fun updatePlaybackState() {
         val state =
             if (isPlaying) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED
@@ -175,6 +181,14 @@ object MusicManager {
         if (context == null) return false
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
 
+        // Android 11+ (API 30+): MANAGE_EXTERNAL_STORAGE is required for broad filesystem access
+        // (needed to list arbitrary dirs and rename files on SD card).
+        // READ_EXTERNAL_STORAGE alone is not sufficient on Android 10-12.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager()
+        }
+
+        // Android 13+ (API 33+): granular media permission replaces READ_EXTERNAL_STORAGE
         val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             Manifest.permission.READ_MEDIA_AUDIO
         else
@@ -187,13 +201,19 @@ object MusicManager {
 
     fun loadTracks(context: Context): Boolean {
         if (!hasPermission(context)) return false
+        appContext = context.applicationContext
         val prefs = PrefsManager.getInstance(context)
         val sortStyle =
-            prefs.getString(PrefsManager.PrefKeys.LIST_SORT_STYLE, PrefsManager.SortStyle.AZ)
-        val keepTogether = prefs.getBoolean(PrefsManager.PrefKeys.LIST_SORT_KEEP_TOGETHER, false)
+            prefs.getString(PrefsManager.FileKeys.LIST_SORT_STYLE, PrefSortStyle.AZ)
+        val keepTogether = prefs.getBoolean(PrefsManager.FileKeys.LIST_SORT_KEEP_TOGETHER, false)
 
-        val dirs = getStorageRoots(context)
-        val raw = dirs.flatMap { scanDir(it) }
+        // API 29 (Android 10): scoped storage blocks File.listFiles() on external storage
+        // even with READ_EXTERNAL_STORAGE granted. Use MediaStore instead.
+        val raw = if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            scanViaMediaStore(context)
+        } else {
+            getStorageRoots(context).flatMap { scanDir(it) }
+        }
 
         // Persist the full folder list before filtering so settings can always show all folders
         val allFolders = raw.mapNotNull { it.file.parent }.distinct().sorted().toSet()
@@ -201,7 +221,7 @@ object MusicManager {
 
         val disabledFolders = prefs.getDisabledFolders()
         val filtered = if (disabledFolders.isEmpty()) raw
-            else raw.filter { it.file.parent !in disabledFolders }
+        else raw.filter { it.file.parent !in disabledFolders }
 
         allTracks = sortTracks(filtered, sortStyle, keepTogether)
         tracks = allTracks
@@ -212,8 +232,8 @@ object MusicManager {
     fun reSort(context: Context) {
         val prefs = PrefsManager.getInstance(context)
         val sortStyle =
-            prefs.getString(PrefsManager.PrefKeys.LIST_SORT_STYLE, PrefsManager.SortStyle.AZ)
-        val keepTogether = prefs.getBoolean(PrefsManager.PrefKeys.LIST_SORT_KEEP_TOGETHER, false)
+            prefs.getString(PrefsManager.FileKeys.LIST_SORT_STYLE, PrefSortStyle.AZ)
+        val keepTogether = prefs.getBoolean(PrefsManager.FileKeys.LIST_SORT_KEEP_TOGETHER, false)
         allTracks = sortTracks(allTracks, sortStyle, keepTogether)
         tracks = allTracks
         currentIndex = tracks.indexOf(currentTrack).coerceAtLeast(0)
@@ -227,14 +247,14 @@ object MusicManager {
         keepTogether: Boolean
     ): List<Track> {
         val comparator: Comparator<Track> = when (sortStyle) {
-            PrefsManager.SortStyle.ZA -> compareByDescending { it.title.lowercase() }
+            PrefSortStyle.ZA -> compareByDescending { it.title.lowercase() }
             else -> compareBy { it.title.lowercase() }
         }
 
         return if (keepTogether) {
             // Group by parent folder, sort folder names, then sort within each folder
             val folderComparator: Comparator<String> = when (sortStyle) {
-                PrefsManager.SortStyle.ZA -> compareByDescending { it.lowercase() }
+                PrefSortStyle.ZA -> compareByDescending { it.lowercase() }
                 else -> compareBy { it.lowercase() }
             }
             source
@@ -245,6 +265,61 @@ object MusicManager {
         } else {
             source.sortedWith(comparator)
         }
+    }
+
+    // API 29 only: READ_EXTERNAL_STORAGE is granted but File.listFiles() is blocked by scoped
+    // storage. Query MediaStore instead, which respects the permission correctly on this API level.
+    private fun scanViaMediaStore(context: Context): List<Track> {
+        val results = mutableListOf<Track>()
+
+        val projection = arrayOf(
+            MediaStore.Audio.Media._ID,
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.ARTIST,
+        )
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+
+        context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            null,
+            "${MediaStore.Audio.Media.TITLE} ASC"
+        )?.use { cursor ->
+            val idCol    = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+            val dataCol  = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+            val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+            val artistCol= cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
+
+            while (cursor.moveToNext()) {
+                val id   = cursor.getLong(idCol)
+                val path = cursor.getString(dataCol) ?: continue
+                val file = File(path)
+
+                // Build a content:// URI for this track — required for MediaPlayer.setDataSource()
+                // on API 29 since raw file path access is blocked by scoped storage.
+                val uri = android.content.ContentUris.withAppendedId(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id
+                )
+
+                val base = Track.fromFile(file)
+                val msTitle  = cursor.getString(titleCol)?.takeIf { it.isNotBlank() }
+                val msArtist = cursor.getString(artistCol)
+                    ?.takeIf { it.isNotBlank() && it != "<unknown>" }
+                results.add(
+                    if (msTitle != null || msArtist != null) {
+                        base.copy(
+                            title      = msTitle ?: base.title,
+                            artists    = if (msArtist != null) listOf(msArtist) else base.artists,
+                            contentUri = uri,
+                        )
+                    } else base.copy(contentUri = uri)
+                )
+            }
+        }
+
+        return results
     }
 
     private fun getStorageRoots(context: Context): List<File> {
@@ -293,10 +368,19 @@ object MusicManager {
     fun play(index: Int = currentIndex) {
         if (tracks.isEmpty() || index !in tracks.indices) return
         currentIndex = index
+        val track = tracks[index]
 
         player?.release()
         player = MediaPlayer().apply {
-            setDataSource(tracks[index].file.absolutePath)
+            // API 29: raw file path access is blocked by scoped storage even with
+            // READ_EXTERNAL_STORAGE granted. Use the content:// URI from MediaStore instead.
+            if (track.contentUri != null) {
+                appContext!!.contentResolver.openFileDescriptor(track.contentUri, "r")
+                    ?.use { pfd -> setDataSource(pfd.fileDescriptor) }
+                    ?: throw java.io.IOException("Could not open URI: ${track.contentUri}")
+            } else {
+                setDataSource(track.file.absolutePath)
+            }
             setOnCompletionListener { onTrackFinished() }
             prepare()
             start()
